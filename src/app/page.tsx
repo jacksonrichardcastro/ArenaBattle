@@ -1,66 +1,60 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from 'next/link';
+import styles from './page.module.css';
 
 export default function Home() {
   return (
     <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+      {/* Hero Section */}
+      <section className={styles.hero}>
+        <div className={styles.glowBlob}></div>
+        <div className={`container ${styles.heroContainer}`}>
+          <h1 className={`animate-fade-in ${styles.title}`}>
+            Play Your Favorite Games.<br />
+            <span className="text-gradient">Win Real Cash.</span>
+          </h1>
+          <p className={`animate-fade-in ${styles.subtitle}`} style={{ animationDelay: '0.1s' }}>
+            ArenaBattle is the premier head-to-head esports platform. Challenge opponents in 
+            Madden, NBA 2K, FC 24, and Call of Duty. Skill-based matchmaking guarantees a fair fight.
           </p>
+          <div className={`animate-fade-in ${styles.ctaGroup}`} style={{ animationDelay: '0.2s' }}>
+            <Link href="/lobby" className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>
+              Find a Match
+            </Link>
+            <Link href="/leaderboards" className="btn btn-outline" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>
+              View Leaderboards
+            </Link>
+          </div>
+          
+          <div className={`animate-fade-in ${styles.badges}`} style={{ animationDelay: '0.3s' }}>
+            <div className={styles.badge}><span className={styles.dot}></span> 24/7 Matchmaking</div>
+            <div className={styles.badge}><span className={styles.dot}></span> Instant Payouts</div>
+            <div className={styles.badge}><span className={styles.dot}></span> Anti-Cheat Secured</div>
+          </div>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* Featured Games Section */}
+      <section className={styles.gamesSection}>
+        <div className="container">
+          <h2 className={styles.sectionTitle}>Featured Titles</h2>
+          <div className={styles.gamesGrid}>
+            {[
+              { title: 'Madden NFL 24', category: 'Sports', color: 'blue' },
+              { title: 'NBA 2K24', category: 'Sports', color: 'gold' },
+              { title: 'EA Sports FC 24', category: 'Sports', color: 'green' },
+              { title: 'Call of Duty: MW3', category: 'Shooter', color: 'red' },
+            ].map((game) => (
+              <div key={game.title} className={`card ${styles.gameCard}`}>
+                <div className={styles.gameCategory}>{game.category}</div>
+                <h3 className={styles.gameTitle}>{game.title}</h3>
+                <div className={styles.gameAction}>
+                  <Link href="/lobby" className="btn btn-outline">Join Lobby</Link>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </main>
+      </section>
     </div>
   );
 }

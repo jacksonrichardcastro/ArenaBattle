@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  username      String        @unique
+  passwordHash  String
+  walletBalance Float         @default(0.00)
+  createdAt     DateTime      @default(now())
+
+  // Relations
+  challengesCreated  Challenge[]   @relation("Creator")
+  challengesAccepted Challenge[]   @relation("Opponent")
+  transactions       Transaction[]
+  messages           Message[]
+  evidenceSubmitted  DisputeEvidence[]
+}
+
+model Challenge {
+  id            String   @id @default(cuid())
+  game          String   
+  format        String
+  platform      String
+  entryFee      Float
+  status        String   @default("OPEN") // OPEN, ACCEPTED, DISPUTED, COMPLETED
+  createdAt     DateTime @default(now())
+
+  creatorResult  String?  // "WON", "LOST"
+  opponentResult String?  // "WON", "LOST"
+
+  // Relations
+  creatorId     String
+  creator       User     @relation("Creator", fields: [creatorId], references: [id])
+  
+  opponentId    String?
+  opponent      User?    @relation("Opponent", fields: [opponentId], references: [id])
+  
+  winnerId      String?  
+  evidence      DisputeEvidence[]
+}
+
+model DisputeEvidence {
+  id          String   @id @default(cuid())
+  fileUrl     String
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime  @default(now())
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   // DEPOSIT, WITHDRAWAL, ENTRY_FEE, PRIZE_PAYOUT
+  amount      Float
+  status      String   @default("COMPLETED")
+  createdAt   DateTime @default(now())
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  text      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
