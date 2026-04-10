@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import styles from '../app/lobby/page.module.css';
+import { acceptChallenge } from '@/lib/actions';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -85,7 +86,7 @@ export default function LobbyRealtimeClient({ initialChallenges }: { initialChal
             </div>
             <div className={styles.actionSection}>
               <div className={styles.entryFee}>Entry: ${(challenge.entryFee || 0).toFixed(2)}</div>
-              <form action={`/api/challenges/${challenge.id}/accept`} method="POST" style={{ display: 'inline' }}>
+              <form action={acceptChallenge.bind(null, challenge.id)} style={{ display: 'inline' }}>
                 <button type="submit" className={`btn btn-gold ${styles.joinBtn}`}>Accept Match</button>
               </form>
             </div>

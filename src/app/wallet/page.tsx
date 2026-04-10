@@ -3,7 +3,8 @@ import { getCurrentUser, processDeposit, processWithdrawal } from '@/lib/actions
 import { redirect } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 
-export default async function Wallet() {
+export default async function Wallet({ searchParams }: { searchParams: Promise<{ success?: string, canceled?: string }> }) {
+  const params = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect('/login');
 
@@ -15,6 +16,16 @@ export default async function Wallet() {
 
   return (
     <div className="container" style={{ padding: '3rem 1.5rem', maxWidth: '800px' }}>
+      {params.success && (
+        <div style={{ background: 'var(--success)', color: 'black', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '2rem', fontWeight: 'bold' }}>
+          Payment successful! Your funds have been securely added to your wallet lockbox.
+        </div>
+      )}
+      {params.canceled && (
+        <div style={{ background: 'var(--danger)', color: 'white', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '2rem', fontWeight: 'bold' }}>
+          Payment canceled. Your card was not charged.
+        </div>
+      )}
       <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>Wallet & Cashier</h1>
       
       <div className={`card ${styles.walletCard}`} style={{ marginBottom: '2rem' }}>
