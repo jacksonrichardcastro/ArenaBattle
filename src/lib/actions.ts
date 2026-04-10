@@ -47,7 +47,7 @@ export async function processDeposit(formData: FormData) {
   if (!user) throw new Error("Unauthorized");
 
   const amount = parseFloat(formData.get('amount') as string);
-  if (amount <= 0 || isNaN(amount)) return { error: "Invalid amount" };
+  if (amount <= 0 || isNaN(amount)) throw new Error();
 
   await prisma.$transaction([
     prisma.user.update({
@@ -61,7 +61,7 @@ export async function processDeposit(formData: FormData) {
 
   revalidatePath('/wallet');
   revalidatePath('/dashboard');
-  return { success: true };
+  
 }
 
 export async function processWithdrawal(formData: FormData) {
@@ -69,10 +69,10 @@ export async function processWithdrawal(formData: FormData) {
   if (!user) throw new Error("Unauthorized");
 
   const amount = parseFloat(formData.get('amount') as string);
-  if (amount <= 0 || isNaN(amount)) return { error: "Invalid amount" };
+  if (amount <= 0 || isNaN(amount)) throw new Error();
 
   if (user.walletBalance < amount) {
-    return { error: "Insufficient funds" };
+    throw new Error();
   }
 
   await prisma.$transaction([
@@ -87,7 +87,7 @@ export async function processWithdrawal(formData: FormData) {
 
   revalidatePath('/wallet');
   revalidatePath('/dashboard');
-  return { success: true };
+  
 }
 
 export async function createChallenge(formData: FormData) {
@@ -99,7 +99,7 @@ export async function createChallenge(formData: FormData) {
   const platform = formData.get('platform') as string || 'Crossplay';
   const entryFee = parseFloat(formData.get('entryFee') as string);
 
-  if (user.walletBalance < entryFee) return { error: "Insufficient funds" };
+  if (user.walletBalance < entryFee) throw new Error();
 
   // Deduct fee and create challenge
   await prisma.$transaction([
@@ -116,7 +116,7 @@ export async function createChallenge(formData: FormData) {
   ]);
 
   revalidatePath('/lobby');
-  return { success: true };
+  
 }
 
 export async function acceptChallenge(challengeId: string) {
@@ -124,9 +124,9 @@ export async function acceptChallenge(challengeId: string) {
   if (!user) throw new Error("Unauthorized");
 
   const challenge = await prisma.challenge.findUnique({ where: { id: challengeId } });
-  if (!challenge || challenge.status !== 'OPEN') return { error: "Challenge is not available" };
-  if (challenge.creatorId === user.id) return { error: "Cannot accept your own challenge" };
-  if (user.walletBalance < challenge.entryFee) return { error: "Insufficient funds" };
+  if (!challenge || challenge.status !== 'OPEN') throw new Error();
+  if (challenge.creatorId === user.id) throw new Error();
+  if (user.walletBalance < challenge.entryFee) throw new Error();
 
   await prisma.$transaction([
     prisma.user.update({
@@ -144,7 +144,7 @@ export async function acceptChallenge(challengeId: string) {
 
   revalidatePath('/lobby');
   revalidatePath('/dashboard');
-  return { success: true };
+  
 }
 
 export async function resolveMatch(challengeId: string, iWon: boolean) {
@@ -152,7 +152,7 @@ export async function resolveMatch(challengeId: string, iWon: boolean) {
   if (!user) throw new Error("Unauthorized");
 
   const challenge = await prisma.challenge.findUnique({ where: { id: challengeId } });
-  if (!challenge || challenge.status !== 'ACCEPTED') return { error: "Invalid challenge" };
+  if (!challenge || challenge.status !== 'ACCEPTED') throw new Error();
 
   const isCreator = user.id === challenge.creatorId;
   const resultStr = iWon ? "WON" : "LOST";
@@ -196,7 +196,7 @@ export async function resolveMatch(challengeId: string, iWon: boolean) {
   }
 
   revalidatePath('/dashboard');
-  return { success: true };
+  
 }
 
 export async function getMessages() {
@@ -209,16 +209,16 @@ export async function getMessages() {
 
 export async function postMessage(formData: FormData) {
   const user = await getCurrentUser();
-  if (!user) return { error: "Unauthorized" };
+  if (!user) throw new Error();
 
   const text = formData.get('text') as string;
-  if (!text || text.trim() === '') return { error: "Empty message" };
+  if (!text || text.trim() === '') throw new Error();
 
   await prisma.message.create({
     data: { text, userId: user.id }
   });
   
-  return { success: true };
+  
 }
 
 import { createClient } from '@supabase/supabase-js';
@@ -271,7 +271,7 @@ export async function uploadEvidence(formData: FormData) {
 
   revalidatePath('/dashboard');
   revalidatePath('/admin');
-  return { success: true };
+  
 }
 
 export async function adminResolveMatch(formData: FormData) {
@@ -302,5 +302,4 @@ export async function adminResolveMatch(formData: FormData) {
 
   revalidatePath('/admin');
   revalidatePath('/dashboard');
-  return { success: true };
 }

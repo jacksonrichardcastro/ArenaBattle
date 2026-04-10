@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import styles from './page.module.css';
-import { getOpenChallenges } from '@/lib/actions';
+import { getOpenChallenges, acceptChallenge } from '@/lib/actions';
 
 export default async function Lobby() {
   const openChallenges = await getOpenChallenges();

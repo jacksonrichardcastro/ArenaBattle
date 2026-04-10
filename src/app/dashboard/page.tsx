@@ -1,5 +1,5 @@
 import styles from './page.module.css';
-import { getCurrentUser, getActiveChallenges, resolveMatch } from '@/lib/actions';
+import { getCurrentUser, getActiveChallenges, resolveMatch, uploadEvidence } from '@/lib/actions';
 import { redirect } from 'next/navigation';
 
 export default async function Dashboard() {
