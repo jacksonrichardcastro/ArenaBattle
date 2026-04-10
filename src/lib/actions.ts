@@ -221,8 +221,12 @@ export async function postMessage(formData: FormData) {
   return { success: true };
 }
 
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function uploadEvidence(formData: FormData) {
   const user = await getCurrentUser();
@@ -239,16 +243,27 @@ export async function uploadEvidence(formData: FormData) {
     throw new Error("Challenge must be disputed to upload evidence");
   }
 
-  const bytes = await file.arrayBuffer();
-  const buffer = Buffer.from(bytes);
+  const filename = `${challengeId}-${user.id}-${file.name.replace(/\s+/g, '_')}`;
 
-  const filename = `${challengeId}-${user.id}-${file.name}`;
-  const path = join(process.cwd(), 'public/uploads', filename);
-  await writeFile(path, buffer);
+  const { data, error } = await supabase.storage
+    .from('evidence')
+    .upload(filename, file, {
+      cacheControl: '3600',
+      upsert: true
+    });
+
+  if (error) {
+    console.error("Supabase Upload Error: ", error);
+    throw new Error("Failed to upload evidence.");
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from('evidence')
+    .getPublicUrl(filename);
 
   await prisma.disputeEvidence.create({
     data: {
-      fileUrl: `/uploads/${filename}`,
+      fileUrl: publicUrlData.publicUrl,
       challengeId,
       userId: user.id
     }
