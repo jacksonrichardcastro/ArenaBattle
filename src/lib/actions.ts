@@ -1,5 +1,7 @@
 'use server';
 
+import Stripe from 'stripe';
+
 import { prisma } from './prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
@@ -49,19 +51,37 @@ export async function processDeposit(formData: FormData) {
   const amount = parseFloat(formData.get('amount') as string);
   if (amount <= 0 || isNaN(amount)) throw new Error();
 
-  await prisma.$transaction([
-    prisma.user.update({
-      where: { id: user.id },
-      data: { walletBalance: { increment: amount } }
-    }),
-    prisma.transaction.create({
-      data: { userId: user.id, type: 'DEPOSIT', amount: amount }
-    })
-  ]);
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: '2024-10-28.acacia' as any,
+  });
 
-  revalidatePath('/wallet');
-  revalidatePath('/dashboard');
-  
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [
+      {
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: 'ArenaBattle Wallet Deposit',
+            description: 'Funding escrow account for matchup entry fees.',
+          },
+          unit_amount: Math.round(amount * 100), 
+        },
+        quantity: 1,
+      },
+    ],
+    mode: 'payment',
+    success_url: `${process.env.NEXTAUTH_URL}/wallet?success=true`,
+    cancel_url: `${process.env.NEXTAUTH_URL}/wallet?canceled=true`,
+    client_reference_id: user.id, 
+    metadata: {
+      userId: user.id,
+    }
+  });
+
+  if (session.url) {
+    import('next/navigation').then(m => m.redirect(session.url!));
+  }
 }
 
 export async function processWithdrawal(formData: FormData) {
