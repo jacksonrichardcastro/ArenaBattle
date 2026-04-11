@@ -1,11 +1,11 @@
-import { getCurrentUser, adminResolveMatch } from '@/lib/actions';
+import { getCurrentUser, adminResolveMatch, adminRefundMatch } from '@/lib/actions';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
 
 export default async function AdminDashboard() {
   const user = await getCurrentUser();
-  if (user?.email !== 'admin@example.com') {
+  if (!user || user.email !== process.env.ADMIN_EMAIL) {
     redirect('/');
   }
 
@@ -50,6 +50,14 @@ export default async function AdminDashboard() {
                     <button type="submit" className="btn btn-outline" style={{ borderColor: 'var(--success)', color: 'var(--success)' }}>Force Win for Opponent</button>
                   </form>
                 </div>
+              </div>
+              <div style={{ marginTop: '1rem', width: '100%' }}>
+                <form action={adminRefundMatch}>
+                  <input type="hidden" name="challengeId" value={dispute.id} />
+                  <button type="submit" className="btn btn-outline" style={{ borderColor: 'var(--danger)', color: 'var(--danger)', width: '100%' }}>
+                    Mutual Cancellation (Refund Both Parties)
+                  </button>
+                </form>
               </div>
 
               <h3>Uploaded Evidence</h3>

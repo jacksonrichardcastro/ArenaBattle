@@ -189,9 +189,11 @@ export async function resolveMatch(challengeId: string, iWon: boolean) {
 
   if (cRes && oRes) {
     if ((cRes === "WON" && oRes === "LOST") || (cRes === "LOST" && oRes === "WON")) {
-      // They agree! Payout winner.
+      // They agree! Payout winner with 10% platform fee taken out.
       const winnerId = cRes === "WON" ? challenge.creatorId : challenge.opponentId!;
-      const prize = challenge.entryFee * 2;
+      const totalPot = challenge.entryFee * 2;
+      const platformFee = totalPot * 0.10;
+      const prize = totalPot - platformFee;
 
       await prisma.$transaction([
         prisma.challenge.update({
@@ -296,7 +298,7 @@ export async function uploadEvidence(formData: FormData) {
 
 export async function adminResolveMatch(formData: FormData) {
   const user = await getCurrentUser();
-  if (user?.email !== 'admin@example.com') throw new Error("Unauthorized");
+  if (!user || user.email !== process.env.ADMIN_EMAIL) throw new Error("Unauthorized Admin");
 
   const challengeId = formData.get('challengeId') as string;
   const winnerId = formData.get('winnerId') as string;
@@ -304,7 +306,9 @@ export async function adminResolveMatch(formData: FormData) {
   const challenge = await prisma.challenge.findUnique({ where: { id: challengeId } });
   if (!challenge || challenge.status !== 'DISPUTED') throw new Error("Invalid");
 
-  const prize = challenge.entryFee * 2;
+  const totalPot = challenge.entryFee * 2;
+  const platformFee = totalPot * 0.10;
+  const prize = totalPot - platformFee;
 
   await prisma.$transaction([
     prisma.challenge.update({
@@ -321,5 +325,74 @@ export async function adminResolveMatch(formData: FormData) {
   ]);
 
   revalidatePath('/admin');
+  revalidatePath('/dashboard');
+}
+
+export async function adminRefundMatch(formData: FormData) {
+  const user = await getCurrentUser();
+  if (!user || user.email !== process.env.ADMIN_EMAIL) throw new Error("Unauthorized Admin");
+
+  const challengeId = formData.get('challengeId') as string;
+  const challenge = await prisma.challenge.findUnique({ where: { id: challengeId } });
+  if (!challenge || (challenge.status !== 'DISPUTED' && challenge.status !== 'ACCEPTED')) throw new Error("Invalid State");
+
+  // Refund both parties their original entry fee
+  const refundAmount = challenge.entryFee;
+
+  let txData = [];
+  
+  if (challenge.creatorId) {
+    txData.push(
+      prisma.user.update({
+        where: { id: challenge.creatorId },
+        data: { walletBalance: { increment: refundAmount } }
+      })
+    );
+  }
+  
+  if (challenge.opponentId) {
+    txData.push(
+      prisma.user.update({
+        where: { id: challenge.opponentId },
+        data: { walletBalance: { increment: refundAmount } }
+      })
+    );
+  }
+
+  await prisma.$transaction([
+    prisma.challenge.update({
+      where: { id: challengeId },
+      data: { status: 'CANCELLED' } // Standardizing canceled state
+    }),
+    ...txData
+  ]);
+
+  revalidatePath('/admin');
+  revalidatePath('/dashboard');
+}
+
+export async function cancelChallenge(challengeId: string) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const challenge = await prisma.challenge.findUnique({ where: { id: challengeId } });
+  if (!challenge || challenge.status !== 'OPEN') throw new Error("Challenge cannot be cancelled");
+  if (challenge.creatorId !== user.id) throw new Error("Unauthorized");
+
+  await prisma.$transaction([
+    prisma.challenge.update({
+      where: { id: challengeId },
+      data: { status: 'CANCELLED' }
+    }),
+    prisma.user.update({
+      where: { id: user.id },
+      data: { walletBalance: { increment: challenge.entryFee } }
+    }),
+    prisma.transaction.create({
+      data: { userId: user.id, type: 'REFUND', amount: challenge.entryFee }
+    })
+  ]);
+
+  revalidatePath('/lobby');
   revalidatePath('/dashboard');
 }

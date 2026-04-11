@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import styles from './page.module.css';
-import { getOpenChallenges } from '@/lib/actions';
+import { getOpenChallenges, getCurrentUser } from '@/lib/actions';
 import LobbyRealtimeClient from '@/components/LobbyRealtimeClient';
 
 export default async function Lobby() {
   const openChallenges = await getOpenChallenges();
+  const user = await getCurrentUser();
 
   return (
     <div className="container" style={{ padding: '3rem 1.5rem' }}>
@@ -25,7 +26,7 @@ export default async function Lobby() {
         </div>
       </div>
 
-      <LobbyRealtimeClient initialChallenges={openChallenges} />
+      <LobbyRealtimeClient initialChallenges={openChallenges} currentUserId={user?.id} />
     </div>
   );
 }

@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import styles from '../app/lobby/page.module.css';
-import { acceptChallenge } from '@/lib/actions';
+import { acceptChallenge, cancelChallenge } from '@/lib/actions';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export default function LobbyRealtimeClient({ initialChallenges }: { initialChallenges: any[] }) {
+export default function LobbyRealtimeClient({ initialChallenges, currentUserId }: { initialChallenges: any[], currentUserId?: string }) {
   const [challenges, setChallenges] = useState(initialChallenges);
 
   useEffect(() => {
@@ -86,9 +86,15 @@ export default function LobbyRealtimeClient({ initialChallenges }: { initialChal
             </div>
             <div className={styles.actionSection}>
               <div className={styles.entryFee}>Entry: ${(challenge.entryFee || 0).toFixed(2)}</div>
-              <form action={acceptChallenge.bind(null, challenge.id)} style={{ display: 'inline' }}>
-                <button type="submit" className={`btn btn-gold ${styles.joinBtn}`}>Accept Match</button>
-              </form>
+              {challenge.creatorId === currentUserId ? (
+                <form action={cancelChallenge.bind(null, challenge.id)} style={{ display: 'inline' }}>
+                  <button type="submit" className="btn btn-danger" style={{ background: 'var(--danger)' }}>Cancel Match</button>
+                </form>
+              ) : (
+                <form action={acceptChallenge.bind(null, challenge.id)} style={{ display: 'inline' }}>
+                  <button type="submit" className={`btn btn-gold ${styles.joinBtn}`}>Accept Match</button>
+                </form>
+              )}
             </div>
           </div>
         </div>
