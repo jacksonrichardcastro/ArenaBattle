@@ -19,7 +19,14 @@ export default function RootLayout({
       <body>
         <Providers>
           <Navbar />
-          <main>{children}</main>
+          <main style={{ minHeight: '80vh' }}>{children}</main>
+          <footer style={{ padding: '2rem', textAlign: 'center', borderTop: '1px solid var(--border-dark)', marginTop: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginBottom: '1rem' }}>
+              <a href="/terms" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Terms of Service</a>
+              <a href="/privacy" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>Privacy Policy</a>
+            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>© {new Date().getFullYear()} ArenaBattle. All rights reserved.</p>
+          </footer>
           <ChatWidget />
         </Providers>
       </body>
