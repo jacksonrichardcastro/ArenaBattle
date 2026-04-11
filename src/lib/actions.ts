@@ -62,7 +62,7 @@ export async function processDeposit(formData: FormData) {
         price_data: {
           currency: 'usd',
           product_data: {
-            name: 'ArenaBattle Wallet Deposit',
+            name: 'Wagyr Wallet Deposit',
             description: 'Funding escrow account for matchup entry fees.',
           },
           unit_amount: Math.round(amount * 100), 

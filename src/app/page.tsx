@@ -13,7 +13,7 @@ export default function Home() {
             <span className="text-gradient">Win Real Cash.</span>
           </h1>
           <p className={`animate-fade-in ${styles.subtitle}`} style={{ animationDelay: '0.1s' }}>
-            ArenaBattle is the premier head-to-head esports platform. Challenge opponents in 
+            Wagyr is the premier head-to-head esports platform. Challenge opponents in 
             Madden, NBA 2K, FC 24, and Call of Duty. Skill-based matchmaking guarantees a fair fight.
           </p>
           <div className={`animate-fade-in ${styles.ctaGroup}`} style={{ animationDelay: '0.2s' }}>
