@@ -21,7 +21,7 @@ export default function Navbar() {
         
         {/* Desktop Links */}
         <div className={styles.navLinks}>
-          <Link href="/lobby" className={styles.link}>The Lobbies</Link>
+          <Link href="/lobby" className={styles.link}>Lobby</Link>
           <Link href="/wallet" className={styles.link}>Wallet</Link>
         </div>
 
@@ -56,7 +56,7 @@ export default function Navbar() {
 
       {/* Mobile Menu Dropdown */}
       <div className={`${styles.mobileMenu} ${isOpen ? styles.open : ''}`}>
-        <Link href="/lobby" className={styles.mobileLink} onClick={() => setIsOpen(false)}>The Lobbies</Link>
+        <Link href="/lobby" className={styles.mobileLink} onClick={() => setIsOpen(false)}>Lobby</Link>
         <Link href="/wallet" className={styles.mobileLink} onClick={() => setIsOpen(false)}>Wallet</Link>
         {session ? (
           <>
