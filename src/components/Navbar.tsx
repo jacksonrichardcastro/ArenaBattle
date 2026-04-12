@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
@@ -28,7 +28,15 @@ export default function Navbar() {
         {/* Desktop Actions */}
         <div className={styles.navActions}>
           {session ? (
-            <Link href="/dashboard" className="btn btn-primary" style={{ padding: '0.5rem 1rem' }}>{session.user?.name}</Link>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <Link href="/dashboard" className="btn btn-primary" style={{ padding: '0.5rem 1rem' }}>{session.user?.name}</Link>
+              <button 
+                onClick={() => signOut({ callbackUrl: '/' })} 
+                style={{ background: 'transparent', color: 'var(--text-secondary)', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Sign Out
+              </button>
+            </div>
           ) : (
             <Link href="/login" className="btn btn-outline" style={{ padding: '0.5rem 1rem' }}>Log In</Link>
           )}
@@ -51,7 +59,10 @@ export default function Navbar() {
         <Link href="/lobby" className={styles.mobileLink} onClick={() => setIsOpen(false)}>The Lobbies</Link>
         <Link href="/wallet" className={styles.mobileLink} onClick={() => setIsOpen(false)}>Wallet</Link>
         {session ? (
-          <Link href="/dashboard" className={`${styles.mobileLink} text-gradient`} onClick={() => setIsOpen(false)}>Dashboard</Link>
+          <>
+            <Link href="/dashboard" className={`${styles.mobileLink} text-gradient`} onClick={() => setIsOpen(false)}>Dashboard</Link>
+            <button className={styles.mobileLink} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', textAlign: 'left', cursor: 'pointer', fontSize: '1rem', fontFamily: 'inherit' }} onClick={() => { setIsOpen(false); signOut({ callbackUrl: '/' }); }}>Sign Out</button>
+          </>
         ) : (
           <Link href="/login" className={`${styles.mobileLink} text-gradient`} onClick={() => setIsOpen(false)}>Log In</Link>
         )}
