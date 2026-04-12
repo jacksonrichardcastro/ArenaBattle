@@ -14,7 +14,7 @@ export default function Home() {
           </h1>
           <p className={`animate-fade-in ${styles.subtitle}`} style={{ animationDelay: '0.1s' }}>
             Wagyr is the premier head-to-head esports platform. Challenge opponents in 
-            Madden, NBA 2K, FC 24, and Call of Duty. Skill-based matchmaking guarantees a fair fight.
+            Madden, NBA 2K, FC 26, and Call of Duty. Skill-based matchmaking guarantees a fair fight.
           </p>
           <div className={`animate-fade-in ${styles.ctaGroup}`} style={{ animationDelay: '0.2s' }}>
             <Link href="/lobby" className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}>
@@ -41,7 +41,7 @@ export default function Home() {
             {[
               { title: 'Madden NFL 24', category: 'Sports', color: 'blue' },
               { title: 'NBA 2K24', category: 'Sports', color: 'gold' },
-              { title: 'EA Sports FC 24', category: 'Sports', color: 'green' },
+              { title: 'EA Sports FC 26', category: 'Sports', color: 'green' },
               { title: 'Call of Duty: MW3', category: 'Shooter', color: 'red' },
             ].map((game) => (
               <div key={game.title} className={`card ${styles.gameCard}`}>
